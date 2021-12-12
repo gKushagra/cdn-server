@@ -13,7 +13,7 @@ router.get('/', function (req, res, next) {
 });
 
 /** POST upload a file */
-router.post('/file/upload/:id/:dir', function (req, res, next) {
+router.post('/file/upload/:id/:dir?', function (req, res, next) {
   let rootDir = `${cStorageDir}/${req.params.id}`;
   // check if root exists
   try {
