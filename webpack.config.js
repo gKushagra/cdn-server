@@ -7,7 +7,7 @@ module.exports = {
     mode: "production",
     devtool: 'source-map',
     entry: {
-        main: './bin/www',
+        main: './app.js',
     },
     output: {
         path: path.join(__dirname, '/dist'),
