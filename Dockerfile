@@ -7,6 +7,8 @@ WORKDIR /usr/src/app
 
 COPY package.json ./
 
+COPY /www ./
+
 # install dependencies
 RUN npm install
 
@@ -27,6 +29,7 @@ WORKDIR /usr/src/app
 # copy from build image
 COPY --from=BUILD_IMAGE /usr/src/app/dist ./dist
 COPY --from=BUILD_IMAGE /usr/src/app/node_modules ./node_modules
+COPY --from=BUILD_IMAGE /usr/src/app/www ./www
 
 EXPOSE 7651
 
