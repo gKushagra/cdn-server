@@ -2,3 +2,4 @@
 /dist/
 /files/
 .env
+.DS_Store

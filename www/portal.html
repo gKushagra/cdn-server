@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png">
+    <link rel="manifest" href="/assets/site.webmanifest">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Ubuntu:300,400,500,700&display=swap" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
+
+    <title>CDN - PORTAL</title>
+    <style type="text/css">
+        body {
+            font-family: 'Ubuntu', sans-serif;
+        }
+    </style>
+</head>
+
+<body data-bs-theme="dark">
+    <div aria-live="polite" aria-atomic="true" class="position-relative">
+        <div class="toast-container top-0 end-0 p-3">
+            <div class="toast align-items-center text-bg-success border-1" role="alert" aria-live="assertive"
+                aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        File Uploaded!
+                    </div>
+                    <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast"
+                        aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/portal">CDN Portal</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="/portal">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <button id="logout" class="nav-link btn btn-link" aria-current="page">Logout</button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="d-flex flex-row w-100">
+        <button type="button" class="btn btn-primary ms-auto mt-2 mb-2 me-2" data-bs-toggle="modal"
+            data-bs-target="#exampleModal">
+            <i class="bi bi-upload"></i> Upload File
+        </button>
+        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true"
+            data-bs-theme="dark">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="exampleModalLabel">File Upload</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form action="/files" method="post" enctype="multipart/form-data">
+                        <div class="modal-body">
+                            <input id="fileInput" type="file" name="file">
+                        </div>
+                        <div class="modal-footer">
+                            <button id="closeModal" type="button" class="btn btn-secondary"
+                                data-bs-dismiss="modal">Close</button>
+                            <button id="upload" type="button" class="btn btn-primary">Upload</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <table class="table table-sm">
+        <thead>
+            <tr>
+                <th scope="col" colspan="7">FILENAME</th>
+                <th scope="col" colspan="5">ACTIONS</th>
+            </tr>
+        </thead>
+        <tbody id="fileList"></tbody>
+    </table>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"
+        integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"
+        integrity="sha384-mQ93GR66B00ZXjt0YO5KlohRA5SY2XofN4zfuZxLkoj1gXtW8ANNCe9d5Y3eG5eD"
+        crossorigin="anonymous"></script>
+
+    <script>
+        (function () {
+            /* single sign on integration begin */
+            const singleSignOnUri = "http://localhost:8080/auth";
+            function redirectToSingleSignOn() {
+                let singleSignOnLink = document.createElement('a');
+                singleSignOnLink.href = singleSignOnUri + "/login?redirectUri=" + window.location.origin;
+                singleSignOnLink.click();
+            }
+            function redirectToLogin() {
+                let redirectToLoginLink = document.createElement('a');
+                redirectToLoginLink.href = window.location.origin;
+                redirectToLoginLink.click();
+            }
+            function verify() {
+                let token = localStorage.getItem('sf-token');
+                fetch(singleSignOnUri + '/verify?redirectUri=' + window.location.origin, {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                })
+                    .then(function (response) {
+                        if (response.status === 401) { throw new Error("Unauthorized"); }
+                        else { return response.text(); }
+                    })
+                    .then(function (data) { loadPortal(); })
+                    .catch(function (error) {
+                        console.error(error);
+                        localStorage.removeItem('sf-token');
+                        redirectToLogin();
+                    });
+            }
+            let token = localStorage.getItem('sf-token');
+            if (token && token !== '') { verify(); }
+            else { redirectToLogin }
+            /* single sign on integration end */
+
+            var deleteButtons = [],
+                headers = new Headers(),
+                fileListEl = document.getElementById('fileList'),
+                copyButtons = [];
+            function loadPortal() {
+                headers.set('Authorization', 'Bearer ' + localStorage.getItem('sf-token'));
+                loadDir();
+                document.getElementById('logout')
+                    .addEventListener('click', function (event) {
+                        localStorage.removeItem('sf-token');
+                        let redirectToLoginLink = document.createElement('a');
+                        redirectToLoginLink.href = window.location.origin;
+                        redirectToLoginLink.click();
+                        showToast('Logged out successfully!');
+                    });
+                let uploadBtn = document.getElementById('upload');
+                uploadBtn.addEventListener('click', function (event) {
+                    let fileInput = document.getElementById('fileInput');
+                    let formData = new FormData();
+                    formData.append('file', fileInput.files[0]);
+                    fetch(window.location.origin + '/files', { method: 'post', headers, body: formData })
+                        .then(function (res) { return res.json(); })
+                        .then(function (data) {
+                            var trEl = getTableRowEl(deleteButtons.length, data.files, deleteButtons);
+                            if (trEl) fileListEl.appendChild(trEl);
+                            document.getElementById('closeModal').click();
+                            showToast('File uploaded successfully!');
+                        })
+                        .catch(function (error) { console.error(error); });
+                });
+            }
+            function loadDir() {
+                fetch(window.location.origin + '/directory', { method: 'GET', headers })
+                    .then(function (response) {
+                        if (response.status === 401) { redirectToLogin(); }
+                        else { return response.json(); }
+                    })
+                    .then(function (data) {
+                        if (data && data.children && data.children.length > 0) {
+                            for (let i = 0; i < data.children.length; i++) {
+                                var trEl = getTableRowEl(i, new CDNResource(data.children[i]), deleteButtons);
+                                if (trEl) fileListEl.appendChild(trEl);
+                            }
+                        }
+                    })
+                    .catch(function (error) { console.error(error); })
+            }
+            function showToast(toastBody) {
+                let toastBodyEl = document.querySelector('.toast-body');
+                if (toastBodyEl) toastBodyEl.innerText = toastBody;
+                let toastElList = document.querySelectorAll('.toast');
+                let toastList = [...toastElList].map(toastEl => new bootstrap.Toast(toastEl, { animation: true, autohide: true, delay: 5000 }))
+                toastList[0].show();
+            }
+            function getTableRowEl(index, cols = null, deleteBtns = []) {
+                if (cols === null) return null;
+                var filename = cols.file.name;
+                var tr = document.createElement('tr');
+                tr.id = `${index}-file`;
+                let td1 = document.createElement('td');
+                td1.innerText = filename;
+                td1.colSpan = 7;
+                tr.appendChild(td1);
+                let td2 = document.createElement('td');
+                let a = document.createElement('a');
+                a.id = `${index}-download`;
+                a.href = `${window.location.origin}/files/${filename}`;
+                a.target = `_blank`;
+                a.innerHTML = '<i class="bi bi-download"></i> Download';
+                td2.appendChild(a);
+                let b = document.createElement('button');
+                b.id = `${index}-delete`;
+                b.setAttribute('data-file', filename);
+                b.type = 'button';
+                b.classList.add('btn');
+                b.classList.add('btn-link');
+                b.innerHTML = '<i class="bi bi-trash"></i> Delete';
+                deleteBtns[index] = b;
+                deleteBtns[index].addEventListener('click', function (event) {
+                    let currFile = event.target.getAttribute('data-file');
+                    fetch(window.location.origin + '/files/' + currFile, { method: 'delete', headers })
+                        .then(function (response) { return response.json() })
+                        .then(function (data) {
+                            let idx = event.target.id.split('-')[0];
+                            let rowToRemoveEl = document.getElementById(`${idx}-file`);
+                            document.getElementById('fileList').removeChild(rowToRemoveEl);
+                            showToast('File deleted successfully!');
+                        })
+                        .catch(function (error) { console.error(error) });
+                });
+
+                td2.appendChild(b);
+                let c = document.createElement('button');
+                c.id = `${index}-clipboard`;
+                c.type = 'button';
+                c.classList.add('btn');
+                c.classList.add('btn-link');
+                c.setAttribute('data-copy', `/files/${filename}`);
+                c.innerHTML = '<i class="bi bi-clipboard"></i> Copy to Clipboard';
+                copyButtons[index] = c;
+                copyButtons[index].addEventListener('click', function (event) {
+                    if (!navigator.clipboard) {
+                        alert('Sorry! Copy to Clipboard is not supported in your browser.');
+                    } else {
+                        navigator.clipboard.writeText(event.target.getAttribute('data-copy'))
+                            .then(function () { showToast('Link copied to Clipboard'); })
+                            .catch(function (error) { console.error(error); })
+                    }
+                });
+                td2.appendChild(c);
+                td2.colSpan = 5;
+                tr.appendChild(td2);
+                return tr;
+            }
+        })();
+        class CDNResource {
+            constructor(_ = { children, file, path }) {
+                this.children = _.children;
+                this.file = new CDNFile(_.file);
+                this.path = _.path;
+            }
+        }
+        class CDNFile {
+            constructor(_ = { lastModified, name, size, type }) {
+                this.lastModified = _.lastModified;
+                this.name = _.name;
+                this.size = _.size;
+                this.type = _.type;
+            }
+        }
+    </script>
+</body>
+
+</html>
