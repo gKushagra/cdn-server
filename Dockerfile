@@ -29,7 +29,7 @@ WORKDIR /usr/src/app
 # copy from build image
 COPY --from=BUILD_IMAGE /usr/src/app/dist ./dist
 COPY --from=BUILD_IMAGE /usr/src/app/node_modules ./node_modules
-COPY --from=BUILD_IMAGE /usr/src/app/www ./www
+COPY --from=BUILD_IMAGE /usr/src/app/www ./dist/www
 
 EXPOSE 7651
 
