@@ -37,7 +37,7 @@ npm run dev OR npm start
 ### Build and Deploy
 
 ```
-npm run build:prod
+npm run build
 ```
 
 ### Dependencies
