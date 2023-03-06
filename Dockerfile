@@ -13,7 +13,7 @@ RUN npm install
 COPY . .
 
 # build application
-RUN npm run build:prod
+RUN npm run build
 
 # remove development dependencies
 RUN npm prune --production
