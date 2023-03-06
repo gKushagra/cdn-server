@@ -239,7 +239,7 @@
                 c.type = 'button';
                 c.classList.add('btn');
                 c.classList.add('btn-link');
-                c.setAttribute('data-copy', `/files/${filename}`);
+                c.setAttribute('data-copy', `${window.location.origin}/${filename}`);
                 c.innerHTML = '<i class="bi bi-clipboard"></i> Copy to Clipboard';
                 copyButtons[index] = c;
                 copyButtons[index].addEventListener('click', function (event) {
