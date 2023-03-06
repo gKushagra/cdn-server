@@ -53,7 +53,7 @@
     <script>
         (function () {
             /* single sign on integration begin */
-            const singleSignOnUri = "http://localhost:8080/auth";
+            const singleSignOnUri = "https://sso.opensourcedit.com/auth";
             function redirectToSingleSignOn() {
                 let singleSignOnLink = document.createElement('a');
                 singleSignOnLink.href = singleSignOnUri + "/login?redirectUri=" + window.location.origin;
